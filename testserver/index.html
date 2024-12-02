@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAI Query</title>
+  <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind CSS -->
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+    <h1 class="text-2xl font-bold text-center mb-4">OpenAI Query Generator</h1>
+    <form id="queryForm" class="space-y-4">
+      <label for="query" class="block text-lg font-medium text-gray-700">Enter your query:</label>
+      <input
+        type="text"
+        id="query"
+        name="query"
+        class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Type your query here"
+      />
+      <button
+        type="submit"
+        class="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      >
+        Generate Response
+      </button>
+    </form>
+
+    <div id="response" class="mt-6 p-4 bg-gray-50 border border-gray-300 rounded-md hidden">
+      <h3 class="font-semibold text-lg">Response:</h3>
+      <p id="responseContent" class="mt-2 text-gray-700"></p>
+    </div>
+
+    <div id="error" class="mt-6 p-4 bg-red-50 border border-red-300 rounded-md hidden">
+      <h3 class="font-semibold text-lg">Error:</h3>
+      <p id="errorContent" class="mt-2 text-red-700"></p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('queryForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const query = document.getElementById('query').value.trim();
+
+      if (!query) {
+        alert('Please enter a query.');
+        return;
+      }
+
+      // Clear previous results
+      document.getElementById('response').classList.add('hidden');
+      document.getElementById('error').classList.add('hidden');
+
+      try {
+        // Send request to backend API
+        const response = await fetch(`http://localhost:3000/generate?query=${encodeURIComponent(query)}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch response from the server');
+        }
+
+        const data = await response.json();
+        
+        if (data.content) {
+          document.getElementById('responseContent').textContent = data.content;
+          document.getElementById('response').classList.remove('hidden');
+        } else {
+          throw new Error('No content received from OpenAI.');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('errorContent').textContent = error.message;
+        document.getElementById('error').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
